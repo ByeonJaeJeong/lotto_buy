@@ -1,17 +1,19 @@
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
+import time
 loginUrl='https://dhlottery.co.kr/user.do?method=login&returnUrl='
-chrome='C:/Users/Jeong/AppData/Local/Programs/Python/Python38/chromedriver.exe'
+chrome='C:/Users/Jeong/AppData/Local/Programs/Python/Python38/lotto_onefile/chromedriver.exe'
 browser =webdriver.Chrome(chrome)
 browser.get(loginUrl)
+print(chrome)
 
 
-
-#id password 구매갯수  입력
+#id password 값 입력
 f= open('login.txt','r')
 id= f.readline().rstrip('\n')
-pw= f.readline()
+pw= f.readline().rstrip('\n')
 value=f.readline()
+
 
 
 
@@ -29,6 +31,7 @@ elem_login.send_keys(pw)
 LOGIN_XPATH= '//*[@id="article"]/div[2]/div/form/div/div[1]/fieldset/div[1]/a'
 browser.find_element_by_xpath(LOGIN_XPATH).click()
 
+time.sleep(1)
 
 #동행복권 구매링크
 link='https://el.dhlottery.co.kr/game/TotalGame.jsp?LottoId=LO40'
