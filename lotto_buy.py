@@ -11,7 +11,7 @@ browser.get(loginUrl)
 f= open('login.txt','r')
 id= f.readline().rstrip('\n')
 pw= f.readline()
-
+value=f.readline()
 
 
 
@@ -40,7 +40,7 @@ browser.find_element_by_xpath('//*[@id="num2"]').click()
 
 #로또 구매 개수 선택
 select= Select(browser.find_element_by_xpath('//*[@id="amoundApply"]'))
-select.select_by_value('5')
+select.select_by_value(value)
 
 #구매 확인 버튼 클릭
 browser.find_element_by_xpath('//*[@id="btnSelectNum"]').click()
