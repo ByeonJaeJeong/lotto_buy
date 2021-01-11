@@ -7,7 +7,7 @@ browser.get(loginUrl)
 
 
 
-#id password 값 입력
+#id password 구매갯수  입력
 f= open('login.txt','r')
 id= f.readline().rstrip('\n')
 pw= f.readline()
