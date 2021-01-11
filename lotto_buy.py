@@ -1,8 +1,12 @@
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
 import time
+import os
+
+#현재 폴더 경로 찾기
+chrome=os.getcwd()+'/chromedriver.exe'
+print(chrome)
 loginUrl='https://dhlottery.co.kr/user.do?method=login&returnUrl='
-chrome='C:/Users/Jeong/AppData/Local/Programs/Python/Python38/lotto_onefile/chromedriver.exe'
 browser =webdriver.Chrome(chrome)
 browser.get(loginUrl)
 print(chrome)
@@ -57,6 +61,7 @@ alert.accept()
 
 #프로그램 종료
 browser.quit()
+
 
 
             
