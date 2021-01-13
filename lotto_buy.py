@@ -45,13 +45,22 @@ class lottoApp(tk.Tk):
             self._frame.destroy()
         self._frame= new_frame
         self._frame.pack()
-    
+class Splash(tk.Toplevel):
+       def __init__(self, parent):
+            tk.Toplevel.__init__(self, parent)
+            self.title("로그인중..")
+            image=tk.PhotoImage(file="loadding.gif",master=self)
+            label=tk.Label(self,image=image)
+            label.pack()
+            ## required to make window show before the program gets to the mainloop
+            self.update()
 #로그인 프레임
 class LoginPage(tk.Frame):
     def __init__(self,master):
         master.title("로그인페이지")
         master.resizable(False,False)
         def loginClick():
+            splash = Splash(self)
             id=tk.Entry.get(IDentry)
             pw=tk.Entry.get(PWentry)
             if(id=='' or pw==''):
@@ -79,10 +88,11 @@ class LoginPage(tk.Frame):
                 #로그인 여부 확인
                 try:
                     alert= browser.switch_to.alert.accept()
-                    time.sleep(1)
+                    master.switch_frame(LoginPage)
                     messagebox.showinfo("로그인 실패","아이디나 패스워드를 확인해주세요")
+                    
                 except:
-                    master.switch_frame(buyPage).pack()
+                   master.switch_frame(buyPage)
         tk.Frame.__init__(self,master)
         IDlabel=tk.Label(self,text="ID : ")
         IDlabel.grid(row=0,column=0)
@@ -229,8 +239,6 @@ class buyPage(tk.Frame):
 if __name__ == "__main__":
     app = lottoApp()
     app.mainloop()
-    
-
 
 
             
