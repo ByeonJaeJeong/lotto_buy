@@ -15,11 +15,13 @@ chrome=os.getcwd()+'/chromedriver.exe'
 loginUrl='https://dhlottery.co.kr/user.do?method=login&returnUrl='
 #구매보관 페이지
 mypageUrl='https://www.dhlottery.co.kr/myPage.do?method=lottoBuyListView'
+lottoUrl='https://dhlottery.co.kr/myPage.do?method=lotto645Detail&orderNo='
+lottoUrl2='&barcode=&issueNo=1'
 options = webdriver.ChromeOptions()
 options.add_argument('headless')
 options.add_argument('window-size=1920x1080')
 options.add_argument("disable-gpu")
-browser=webdriver.Chrome(chrome,chrome_options=options)
+browser=webdriver.Chrome(chrome,options=options)
 browser.implicitly_wait(3)
 
 #메인 프레임
@@ -31,14 +33,19 @@ class lottoApp(tk.Tk):
         self.switch_frame(LoginPage)
     #종료시 브라우저도 같이 닫음
     def on_exit(self):
-        self.destroy()
-        browser.quit()
+        try:
+            self.destroy()
+            browser.quit()
+            lottoapp.destory()
+        except:
+            print("정상종료 실패")
     def switch_frame(self,frame_class):
         new_frame =frame_class(self)
         if self._frame is not None:
             self._frame.destroy()
         self._frame= new_frame
         self._frame.pack()
+    
 #로그인 프레임
 class LoginPage(tk.Frame):
     def __init__(self,master):
@@ -71,13 +78,9 @@ class LoginPage(tk.Frame):
                 browser.find_element_by_xpath(LOGIN_XPATH).click()
                 #로그인 여부 확인
                 try:
-                
-                    alert= browser.switch_to.alert
-                    alert.accept()
-            
+                    alert= browser.switch_to.alert.accept()
                     time.sleep(1)
                     messagebox.showinfo("로그인 실패","아이디나 패스워드를 확인해주세요")
-            
                 except:
                     master.switch_frame(buyPage).pack()
         tk.Frame.__init__(self,master)
@@ -91,6 +94,7 @@ class LoginPage(tk.Frame):
         PWentry.grid(row=1,column=1)
         LoginButton=tk.Button(self,text="로그인",width=10,height=2 ,command=loginClick)
         LoginButton.grid(row=0,column=2,rowspan=2,padx=3)
+        
 #로그인후 페이지
 class buyPage(tk.Frame):
     def __init__(self,master):
@@ -98,45 +102,66 @@ class buyPage(tk.Frame):
         master.title("구매 페이지")
         master.resizable(False,False)
         tk.Frame.__init__(self,master)
-        
-        #구매한 로또
         def getLottoInfo():
-            
-            browser.get(mypageUrl)
-            browser.switch_to.frame('lottoBuyList')
-            html=browser.page_source
-            soup=BeautifulSoup(html,'html.parser')
-            table=soup.find('table',{'class':'tbl_data_col'})
-            tbody=table.find('tbody')
-            trs=tbody.find_all('tr')
-            for idx,tr in enumerate(trs):
-                tds= tr.find_all('td')
-                buy_date=tds[0].text.strip()
-                lotto_type=tds[1].text.strip()
-                round=tds[2].text.strip()
-                lotto_number=tds[3].text.strip()
-                lotto_count=tds[4].text.strip()
-                lotto_rank=tds[5].text.strip()
-                lotto_money=tds[6].text.strip()
-                lotto_drawdate=tds[7].text.strip()
-                #데이터 
-                buy_date_label=tk.Label(self,text=buy_date)
-                buy_date_label.grid(row=4+idx,column=0)
-                lotto_type_label=tk.Label(self,text=lotto_type)
-                lotto_type_label.grid(row=4+idx,column=1)
-                round_label=tk.Label(self,text=round)
-                round_label.grid(row=4+idx,column=2)
-                lotto_number_label=tk.Label(self,text=lotto_number)
-                lotto_number_label.grid(row=4+idx,column=3)
-                lotto_count_label=tk.Label(self,text=lotto_count)
-                lotto_count_label.grid(row=4+idx,column=4)
-                lotto_rank_label=tk.Label(self,text=lotto_rank)
-                lotto_rank_label.grid(row=4+idx,column=5)
-                lotto_money_label=tk.Label(self,text=lotto_money)
-                lotto_money_label.grid(row=4+idx,column=6)
-                lotto_drawdate_label=tk.Label(self,text=lotto_drawdate)
-                lotto_drawdate_label.grid(row=4+idx,column=7)
-                
+            try:
+                browser.get(mypageUrl)
+                browser.find_element_by_xpath('//*[@id="frm"]/table/tbody/tr[3]/td/span[2]/a[3]').click()
+                browser.find_element_by_xpath('//*[@id="submit_btn"]').click()
+                browser.switch_to.frame('lottoBuyList')
+                html=browser.page_source
+                soup=BeautifulSoup(html,'html.parser')
+                table=soup.find('table',{'class':'tbl_data_col'})
+                tbody=table.find('tbody')
+                trs=tbody.find_all('tr')
+                #구매한로또 확인
+                def lottoInfo(number):
+                    browser.get(lottoUrl+number+lottoUrl2)
+                    browser.set_window_size(500,550)
+                    browser.get_screenshot_as_file('capture.png')
+
+                   #새창 띄우기
+                    lottoapp=tk.Tk()
+                    lottoapp.geometry('500x450')
+                    lottoapp.resizable(False,False)
+                    lottoapp.title("구매한 로또")
+                    image=tk.PhotoImage(file="capture.png",master=lottoapp)
+                    label=tk.Label(lottoapp,image=image)
+                    label.pack()
+                    
+                    lottoapp.mainloop()
+                   
+                for idx,tr in enumerate(trs):
+                    tds= tr.find_all('td')
+                    buy_date=tds[0].text.strip()
+                    lotto_type=tds[1].text.strip()
+                    round=tds[2].text.strip()
+                    lotto_number=tds[3].text.strip()
+                    lotto_count=tds[4].text.strip()
+                    lotto_rank=tds[5].text.strip()
+                    lotto_money=tds[6].text.strip()
+                    lotto_drawdate=tds[7].text.strip()
+                    buy_date_label=tk.Label(self,text=buy_date)
+                    buy_date_label.grid(row=4+idx,column=0)
+                    lotto_type_label=tk.Label(self,text=lotto_type)
+                    lotto_type_label.grid(row=4+idx,column=1)
+                    round_label=tk.Label(self,text=round)
+                    round_label.grid(row=4+idx,column=2)
+                    if(lotto_type=='로또6/45'):
+                        lotto_number_button=tk.Button(self,text="확인하기",command=lambda:lottoInfo(lotto_number))
+                        lotto_number_button.grid(row=4+idx,column=3)
+                    else:
+                        lotto_number_label=tk.Label(self,text=lotto_number)
+                        lotto_number_label.grid(row=4+idx,column=3)
+                    lotto_count_label=tk.Label(self,text=lotto_count)
+                    lotto_count_label.grid(row=4+idx,column=4)
+                    lotto_rank_label=tk.Label(self,text=lotto_rank)
+                    lotto_rank_label.grid(row=4+idx,column=5)
+                    lotto_money_label=tk.Label(self,text=lotto_money)
+                    lotto_money_label.grid(row=4+idx,column=6)
+                    lotto_drawdate_label=tk.Label(self,text=lotto_drawdate)
+                    lotto_drawdate_label.grid(row=4+idx,column=7)
+            except:
+                print("구매내역 없음")
             
         def buyClick():
             value=tk.Entry.get(comboBox)
@@ -166,7 +191,6 @@ class buyPage(tk.Frame):
                 browser.find_element_by_xpath('//*[@id="recommend720Plus"]/div')
                 messagebox.showinfo("구매실패","이번주 구매한도 5천원을 모두 채우셨습니다.")
             except:
-                #프로그램 종료
                 messagebox.showinfo("구매성공","정상적으로 구매되었습니다.")
         #로또구매정보
         getLottoInfo()
@@ -184,7 +208,7 @@ class buyPage(tk.Frame):
         blankLabel_1.grid(row=2,column=0,columnspan=8)
         
         time.sleep(1)
-        #label
+        #label         
         buy_date_label=tk.Label(self,text="구매날짜")
         buy_date_label.grid(row=3,column=0)
         lotto_type_label=tk.Label(self,text="복권명")
@@ -205,7 +229,7 @@ class buyPage(tk.Frame):
 if __name__ == "__main__":
     app = lottoApp()
     app.mainloop()
-         
+    
 
 
 
